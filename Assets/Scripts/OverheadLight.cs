@@ -11,8 +11,7 @@
         initialPosition = (transform.position - parent.transform.position);
     }
 
-    // Update is called once per frame
-    void Update () {
+    void FixedUpdate () {
             transform.position = parent.transform.position + initialPosition;
         }
     }
