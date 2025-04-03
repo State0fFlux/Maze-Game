@@ -9,11 +9,13 @@ public class TiltControl : MonoBehaviour {
     private Vector3 rotation;         // current Euler angle of the maze
     private GameObject[] collectibles;
     private Rigidbody playerRb; // Player rigid body
+    private Vector3 movement;
 
 
     // UI
     public GameObject winMenu;
     public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI display;
 
     // CAMS
     public GameObject staticCam;
@@ -54,27 +56,38 @@ public class TiltControl : MonoBehaviour {
         mobileCam.SetActive(isMobile);
     }
 
+    public void SwapCam()
+    {
+        SetMobileCam(staticCam.activeSelf);
+    }
+
     // FixedUpdate is called at a fixed interval. This is useful for physics
     // simulation and also for the Rigidbody update.
     private void FixedUpdate()
     {
-        if (!won) {
-            if (playerRb.position.y <= -5) { // fell out of bounds
+        if (!won)
+        {
+            if (playerRb.position.y <= -5)
+            { // fell out of bounds
                 Reset();
             }
-            if (SystemInfo.deviceType == DeviceType.Handheld) {
-                // For mobile devices, we add the force to the player based on
-                // the acceleration from the accelerometer
-                playerRb.AddForce(
-                    new Vector3(Input.acceleration.x, 0, Input.acceleration.y)
-                        * sensitivity);
-            } else {
-                Vector3 movement = new Vector3(
-                    Input.GetAxis("Vertical"), 0f, -Input.GetAxis("Horizontal"));
-                rotation += movement;
-                maze.transform.rotation = Quaternion.Euler(rotation);
+            if (SystemInfo.deviceType == DeviceType.Handheld)
+            {
+                // Get gyro rotation
+                Vector3 deviceRotation = Input.gyro.attitude.eulerAngles;
+                display.text = "x: " + deviceRotation.x + ", y: " + deviceRotation.y + ", z: " + deviceRotation.z;
             }
-        } else { // pause movement
+            else
+            {
+                rotation += new Vector3(
+                Input.GetAxis("Vertical"), 0f, -Input.GetAxis("Horizontal"));
+                maze.transform.rotation = Quaternion.Euler(rotation);
+
+            }
+            //maze.transform.rotation = Quaternion.Euler(rotation);
+        }
+        else
+        { // pause movement
             playerRb.linearVelocity = Vector3.zero;
         }
     }
